@@ -1,12 +1,2381 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<title>GBHSS Younusabad</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBHSS YOUNUSABAD - Result System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --danger: #ff4747;
+            --success: #10b981;
+            --secondary: #64748b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container-main {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- 1. FLOATING HEADER --- */
+        .ag-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ag-header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+        }
+
+        .ag-header p {
+            opacity: 0.7;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .header-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* --- 2. ADD STUDENT CARD (GLASS) --- */
+        .ag-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .isl-box {
+            grid-column: span 2;
+        }
+
+        .form-group,
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label,
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        /* --- 3. THE UPDATE BUTTON --- */
+        .btn-add,
+        .update-btn {
+            width: 100%;
+            grid-column: 1 / -1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px var(--primary-glow);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-add:hover,
+        .update-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px var(--primary-glow);
+            background: #4f46e5;
+        }
+
+        /* --- 4. MODERN TABLE --- */
+        .table-container {
+            overflow: auto;
+            max-height: 700px;
+            border-radius: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            padding: 15px;
+            color: var(--text-sub);
+            font-size: 13px;
+            text-align: left;
+        }
+
+        tr.row-float {
+            background: white;
+            transition: 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        tr.row-float td {
+            padding: 15px;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tr.row-float td:first-child {
+            border-radius: 16px 0 0 16px;
+            border-left: 1px solid #f1f5f9;
+        }
+
+        tr.row-float td:last-child {
+            border-radius: 0 16px 16px 0;
+            border-right: 1px solid #f1f5f9;
+        }
+
+        tr.row-float:hover {
+            transform: translateY(-4px) scale(1.005);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        /* --- 5. GRADE BADGE (F) --- */
+        .badge-f {
+            background: rgba(255, 71, 71, 0.1);
+            color: var(--danger);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            border: 1px solid rgba(255, 71, 71, 0.2);
+            box-shadow: 0 4px 10px rgba(255, 71, 71, 0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- 6. ACTIONS DROPDOWN --- */
+        .actions-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-menu {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            font-family: inherit;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .btn-menu:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .ag-dropdown-new {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 160px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+            display: none;
+            z-index: 100;
+            transform-origin: top right;
+            animation: grow 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        @keyframes grow {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .ag-dropdown-new.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .ag-grade-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ag-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 28px;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ag-badge:hover {
+            transform: translateY(-4px) scale(1.1);
+            /* Antigravity lift */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .ag-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .ag-badge:hover::after {
+            left: 100%;
+        }
+
+        .grade-a-plus {
+            background: #16a34a;
+            color: #fff;
+        }
+
+        .grade-a {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .grade-b {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .grade-c {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .grade-d {
+            background: #eab308;
+            color: #111;
+        }
+
+        .grade-f {
+            background: rgba(255, 71, 71, 0.15);
+            /* Soft transparent red */
+            color: #ff4747;
+            /* Vibrant Red text */
+            border: 1px solid rgba(255, 71, 71, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 71, 71, 0.2);
+        }
+
+        .ag-badge.grade-f:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(255, 71, 71, 0.4);
+            background: rgba(255, 71, 71, 0.25);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            min-width: 60px;
+        }
+
+        .status-pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-fail {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 11px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        /* New AG Action Wrapper Styles */
+        .ag-wrapper {
+            position: relative;
+            display: inline-block;
+            outline: none;
+        }
+
+        .ag-btn-main {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border: 1px solid #cbd5e1;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #334155;
+        }
+
+        .ag-wrapper:hover .ag-btn-main,
+        .ag-wrapper:focus-within .ag-btn-main {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+            border-color: #94a3b8;
+        }
+
+        .ag-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .ag-icon-wrapper {
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .ag-chevron {
+            transition: transform 0.3s;
+            color: #94a3b8;
+        }
+
+        .ag-wrapper:hover .ag-chevron,
+        .ag-wrapper:focus-within .ag-chevron {
+            transform: rotate(180deg);
+        }
+
+        .ag-menu-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            min-width: 160px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            z-index: 100;
+            overflow: hidden;
+            animation: agFadeInUp 0.3s ease forwards;
+        }
+
+        .ag-wrapper:hover .ag-menu-panel,
+        .ag-wrapper:focus-within .ag-menu-panel {
+            display: block;
+        }
+
+        @keyframes agFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ag-menu-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .ag-menu-item:hover {
+            background: #f1f5f9;
+            padding-left: 20px;
+            /* Slight indent hover effect */
+        }
+
+        .ag-menu-item span {
+            font-size: 16px;
+        }
+
+        .ag-menu-item.delete {
+            color: var(--danger);
+        }
+
+        .ag-menu-item.delete:hover {
+            background: #fef2f2;
+        }
+
+        .ag-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 4px 0;
+        }
+
+        /* --- New Result Card Styles --- */
+        .print-page {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .result-card-container {
+            width: 100%;
+            max-width: 8.27in;
+            /* A4 width */
+            background: #fff;
+            border: 2px solid #2d6a4f;
+            border-radius: 12px;
+            padding: 20px;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+        }
+
+        .outer-border {
+            border: 2px solid #2d6a4f;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            position: absolute;
+            left: 0;
+            object-fit: contain;
+        }
+
+        .school-name-block {
+            text-align: center;
+        }
+
+        .school-name {
+            font-size: 30px;
+            font-weight: 600;
+            color: #1b4332;
+            margin: 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .session-info {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .document-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #34495e;
+            padding: 10px 0;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+
+        /* --- Student Info --- */
+        .student-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            text-align: center;
+            /* Center labels and values */
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+            /* Label upar, Value niche */
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* --- Marks Table --- */
+        .marks-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .marks-table th,
+        .marks-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        .marks-table th {
+            background-color: #e2e8f0;
+            color: #343a40;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .marks-table td {
+            font-size: 15px;
+            color: #495057;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .marks-table .subject-col {
+            text-align: left;
+            font-weight: 600;
+            color: #212529;
+            width: 30%;
+        }
+
+        .sub-subject-info {
+            font-weight: 400;
+            color: #6c757d;
+            font-size: 12px;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .obtained-val {
+            color: #212529;
+            font-weight: 800;
+        }
+
+        .remarks-fail {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Consistent Antigravity Grade Badge */
+        .grade-badge-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ag-grade-badge {
+            background: rgba(255, 71, 71, 0.15);
+            /* Soft Red for F */
+            color: #ff4747;
+            border: 1px solid rgba(255, 71, 71, 0.3);
+            padding: 0 20px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 20px;
+            line-height: 1;
+            box-shadow: 0 4px 10px rgba(255, 71, 71, 0.1);
+            min-width: 40px;
+            box-sizing: border-box;
+        }
+
+        /* --- Summary Section --- */
+        .summary-block {
+            background-color: #fff8e1;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 20px 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .grand-total-block {
+            grid-column: span 1;
+        }
+
+        .percentage-block {
+            grid-column: span 1;
+        }
+
+        .grade-block {
+            grid-column: span 1;
+            justify-self: end;
+        }
+
+        .summary-item-label {
+            font-size: 13px;
+            color: #856404;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .summary-item-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .percentage-val {
+            color: #0d6efd;
+        }
+
+        .percentage-icon {
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        /* --- Footer (System & Signatures) --- */
+        .grading-system {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 11px;
+            color: #6c757d;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .grading-system-label {
+            font-weight: 600;
+            color: #495057;
+            margin-right: 10px;
+        }
+
+        .system-fail {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 40px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #ced4da;
+            margin-bottom: 10px;
+        }
+
+        .signature-text {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .principal-sub-text {
+            font-weight: 400;
+            color: #adb5bd;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* Print media styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .print-ul {
+                text-decoration: underline !important;
+                font-weight: 900 !important;
+            }
+
+            .hide-on-print {
+                display: none !important;
+            }
+
+            .show-on-print {
+                display: inline !important;
+            }
+        }
+
+        /* PDF Generation Mode classes */
+        .pdf-mode .no-print {
+            display: none !important;
+        }
+
+        .pdf-mode .print-ul {
+            text-decoration: underline !important;
+            font-weight: 900 !important;
+        }
+
+        .pdf-mode .hide-on-print {
+            display: none !important;
+        }
+
+        .pdf-mode .show-on-print {
+            display: inline !important;
+        }
+
+        .pdf-mode .pdf-mode-show {
+            display: block !important;
+        }
+
+        .show-on-print {
+            display: none;
+        }
+
+        .watermark {
+            width: 80%;
+            max-width: 550px;
+            opacity: 0.08;
+            filter: grayscale(100%);
+        }
+
+        .school-logo {
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            height: 5rem;
+            width: 5rem;
+            object-fit: contain;
+            z-index: 20;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Welcome to GBHSS Younusabad</h1>
-<p>This website is hosted on GitHub Pages.</p>
+    <div class="container-main no-print-wrapper" id="mainContainer">
+        <div class="ag-header no-print">
+            <h1>GBHSS YOUNUSABAD</h1>
+            <p id="displayExamSystem">Final Examination Result System | Session 2025-2026</p>
+            <div class="header-btns">
+                <button class="glass-btn" onclick="openConfigModal()">⚙️ Settings / Exam Details</button>
+                <button class="glass-btn" onclick="downloadSheet()">📥 Download PDF Result Sheet</button>
+                <button class="glass-btn" id="btnDownloadAll" onclick="downloadSelectedCards()"
+                    style="background: #22c55e; border: none;">🖨️ Print Selected (2 Per Page)</button>
+            </div>
+        </div>
 
+        <div class="ag-card no-print">
+            <form id="studentForm" onsubmit="addStudent(event)">
+                <div class="card-title">
+                    <div style="color: var(--primary);">Add New Student Record</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" onclick="openFastEntryModal()"
+                            style="background: var(--success); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">⚡
+                            Fast Marks Entry</button>
+                        <button type="button" onclick="openBulkModal()"
+                            style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">📥
+                            Bulk Add Students</button>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Roll Number</label>
+                        <input type="number" id="inpRoll" placeholder="e.g. 001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Student Name</label>
+                        <input type="text" id="inpName" placeholder="Enter Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Father's Name</label>
+                        <input type="text" id="inpFName" placeholder="Enter Father's Name" required>
+                    </div>
+                </div>
+
+                <div class="card-title"
+                    style="font-size: 15px; color: var(--secondary); margin-bottom: 15px; border:none; padding:0;">
+                    Subject Marks</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>English (100)</label><input type="number" id="inpEng" max="100"
+                            min="0"></div>
+                    <div class="form-group"><label>Mathematics (100)</label><input type="number" id="inpMath" max="100"
+                            min="0"></div>
+                    <div class="form-group"><label>Urdu (100)</label><input type="number" id="inpUrdu" max="100"
+                            min="0"></div>
+                    <div class="form-group"><label>Science (100)</label><input type="number" id="inpSci" max="100"
+                            min="0"></div>
+                    <div class="form-group"><label>S. Studies (100)</label><input type="number" id="inpSS" max="100"
+                            min="0"></div>
+                    <div class="form-group"><label>Sindhi (50)</label><input type="number" id="inpSindhi" max="50"
+                            min="0"></div>
+
+                    <div class="isl-box">
+                        <label style="display:block; margin-bottom:10px; font-weight:600; font-size:12px;">Islamiat
+                            (100)</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="number" id="inpIslTh" placeholder="Theory (75)" style="flex:1;" max="75"
+                                min="0">
+                            <input type="number" id="inpIslNz" placeholder="Nazra (25)" style="flex:1;" max="25"
+                                min="0">
+                        </div>
+                    </div>
+
+                    <div
+                        style="grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin-bottom: 5px; padding: 10px; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px;">
+                        <input type="checkbox" id="inpAbsent"
+                            style="width:16px; height:16px; cursor:pointer; accent-color: var(--danger);">
+                        <label for="inpAbsent"
+                            style="font-weight: 600; color: var(--danger); font-size: 13px; cursor:pointer; margin:0;">Mark
+                            as Long Absent</label>
+                    </div>
+
+                    <button type="submit" class="update-btn">+ Add Student to Result Sheet</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="ag-card" id="resultSheet">
+            <div class="text-center mb-4 pb-3 show-on-print pdf-mode-show"
+                style="display: none; border-bottom: 2px solid #1e3a8a;">
+                <h1 style="font-size: 24px; font-weight: 900; color: #1e3a8a; margin: 0;">GBHSS YOUNUSABAD</h1>
+                <h2 id="displayExamSheet" style="font-size: 18px; color: #333; margin: 5px 0;">Final Examination
+                    Result
+                    Sheet</h2>
+                <h3 id="displayClassSession" style="font-size: 14px; color: #666; margin: 0;">Class: 4 | Session:
+                    2025-2026</h3>
+            </div>
+
+            <div class="no-print"
+                style="margin-bottom: 15px; display: flex; justify-content: flex-end; align-items: center;">
+                <input type="text" id="searchInput" onkeyup="renderTable()"
+                    placeholder="🔍 Search by Roll No or Name..."
+                    style="padding: 10px 15px; border: 1.5px solid #e2e8f0; border-radius: 8px; width: 100%; max-width: 350px; font-size: 14px; outline: none; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="no-print" style="width: 40px; text-align: center;"><input type="checkbox"
+                                    id="selectAll" onclick="toggleAll()"></th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Eng</th>
+                            <th>Math</th>
+                            <th>Urdu</th>
+                            <th>Sci</th>
+                            <th>Social Studies</th>
+                            <th>Isl</th>
+                            <th>Sindhi</th>
+                            <th>Total</th>
+                            <th>%</th>
+                            <th>Grade</th>
+                            <th class="no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentList">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Result Card Printable Area (Hidden normally, used for PDF export) -->
+    <div id="resultCardContainer" style="display: none; position: absolute; left: -9999px; top: 0; z-index: 1;">
+        <div id="resultCard" class="result-card-container" style="transform-origin: top left;">
+            <div class="outer-border">
+
+                <div class="header">
+                    <img src="logo.png" alt="School Logo" class="header-logo school-logo">
+                    <div class="school-name-block">
+                        <h1 class="school-name">GBHSS YOUNUSABAD</h1>
+                        <div class="session-info" id="cardExamSession">Final Annual Examination (Session: 2025-2026)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="document-title">Student Result Card</div>
+
+                <div class="student-info-grid">
+                    <div class="info-field">
+                        <span class="info-label">Roll No</span>
+                        <span class="info-value" id="cardRoll"></span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Class</span>
+                        <span class="info-value cardClassNameDisplay">4</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Student Name</span>
+                        <span class="info-value" id="cardName"></span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Father's Name</span>
+                        <span class="info-value" id="cardFName"></span>
+                    </div>
+                </div>
+
+                <table class="marks-table">
+                    <thead>
+                        <tr>
+                            <th class="subject-col">Subject</th>
+                            <th>Total Marks</th>
+                            <th>Obtained</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="subject-col">English</td>
+                            <td>100</td>
+                            <td class="obtained-val" id="mEng"></td>
+                            <td class="remarks-fail" id="rmEng"></td>
+                        </tr>
+                        <tr>
+                            <td class="subject-col">Mathematics</td>
+                            <td>100</td>
+                            <td class="obtained-val" id="mMath"></td>
+                            <td class="remarks-fail" id="rmMath"></td>
+                        </tr>
+                        <tr>
+                            <td class="subject-col">Urdu</td>
+                            <td>100</td>
+                            <td class="obtained-val" id="mUrdu"></td>
+                            <td class="remarks-fail" id="rmUrdu"></td>
+                        </tr>
+                        <tr>
+                            <td class="subject-col">Science</td>
+                            <td>100</td>
+                            <td class="obtained-val" id="mSci"></td>
+                            <td class="remarks-fail" id="rmSci"></td>
+                        </tr>
+                        <tr>
+                            <td class="subject-col">Social Studies</td>
+                            <td>100</td>
+                            <td class="obtained-val" id="mSS"></td>
+                            <td class="remarks-fail" id="rmSS"></td>
+                        </tr>
+                        <tr>
+                            <td class="subject-col">Islamiat<span class="sub-subject-info">Theory: 75, Nazra: 25</span>
+                            </td>
+                            <td>100</td>
+                            <td class="obtained-val">
+                                <span id="mIslTotal"></span>
+                                <span class="sub-subject-info" id="mIslSplit"></span>
+                            </td>
+                            <td class="remarks-fail" id="rmIsl"></td>
+                        </tr>
+                        <tr>
+                            <td class="subject-col">Sindhi</td>
+                            <td>50</td>
+                            <td class="obtained-val" id="mSindhi"></td>
+                            <td class="remarks-fail" id="rmSindhi"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="summary-block"
+                    style="display: flex; justify-content: space-around; align-items: center; background: #fffdf5; padding: 15px; border-radius: 10px; margin-bottom: 35px;">
+                    <div class="total" style="text-align: center;">
+                        <small
+                            style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Grand
+                            Total</small><br>
+                        <b style="font-size: 16px; color: #1e293b;"><span id="cTotal"></span> / <span
+                                style="font-size: 16px; color:#1e293b;">650</span></b>
+                    </div>
+                    <div class="percent" style="text-align: center;">
+                        <small
+                            style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Percentage</small><br>
+                        <b style="color: #0d6efd; font-size: 16px;" id="cPerc"></b>
+                    </div>
+                    <div class="grade" style="text-align: center;">
+                        <small
+                            style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Final
+                            Grade</small><br>
+                        <div class="grade-badge-container" style="margin-top: 5px;">
+                            <div class="ag-grade-badge" id="cardGrade"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grading-system">
+                    <span class="grading-system-label">Grading System:</span>
+                    A+ (&geq;80%) | A (70-79%) | B (60-69%) | C (50-59%) | D (40-49%) | <span class="system-fail">F
+                        (&lt;40% Fail)</span>
+                </div>
+
+                <div class="signature-section">
+                    <div>
+                        <div class="signature-line"></div>
+                        <span class="signature-text">CLASS TEACHER</span>
+                    </div>
+                    <div>
+                        <div class="signature-line"></div>
+                        <span class="signature-text">PRINCIPAL SIGNATURE</span>
+                        <div class="principal-sub-text">GBHSS YOUNUSABAD</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let examConfig = JSON.parse(localStorage.getItem('examConfig')) || { examName: 'Final Examination', className: '4', sectionName: '', sessionName: '2025-2026' };
+        if (examConfig.sectionName === undefined) examConfig.sectionName = '';
+
+        function getStorageKey() {
+            return `studentsData_${examConfig.className}_${examConfig.sectionName}_${examConfig.sessionName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+        }
+
+        let currentDBKey = getStorageKey();
+        let students = JSON.parse(localStorage.getItem(currentDBKey));
+
+        if (!students) {
+            let legacy = JSON.parse(localStorage.getItem('studentsData'));
+            if (legacy && legacy.length > 0) {
+                students = legacy;
+                localStorage.setItem(currentDBKey, JSON.stringify(students));
+            } else {
+                students = [];
+            }
+        }
+
+        function saveStudentsData() {
+            localStorage.setItem(getStorageKey(), JSON.stringify(students));
+        }
+
+        let editingId = null;
+
+        function renderHeader() {
+            document.getElementById('displayExamSystem').innerText = `${examConfig.examName} Result System | Session ${examConfig.sessionName}`;
+            document.getElementById('displayExamSheet').innerText = `${examConfig.examName} Result Sheet`;
+            document.getElementById('displayClassSession').innerText = `Class: ${examConfig.className} ${examConfig.sectionName ? '(' + examConfig.sectionName + ')' : ''} | Session: ${examConfig.sessionName}`;
+            document.getElementById('cardExamSession').innerText = `${examConfig.examName} (Session: ${examConfig.sessionName})`;
+            document.querySelectorAll('.cardClassNameDisplay').forEach(el => el.innerText = examConfig.className);
+        }
+
+        function getRemark(marks, total) {
+            const perc = (marks / total) * 100;
+            if (perc < 40) return '<span class="text-red-600 font-bold uppercase tracking-wide text-[10px]">Fail</span>';
+            return '<span class="text-green-600 font-bold uppercase tracking-wide text-[10px]">Pass</span>';
+        }
+
+        function calculateGrade(percentage) {
+            if (percentage >= 80) return 'A+';
+            if (percentage >= 70) return 'A';
+            if (percentage >= 60) return 'B';
+            if (percentage >= 50) return 'C';
+            if (percentage >= 40) return 'D';
+            return 'F';
+        }
+
+        function getGradeClass(grade) {
+            switch (grade) {
+                case 'A+': return 'grade-a-plus';
+                case 'A': return 'grade-a';
+                case 'B': return 'grade-b';
+                case 'C': return 'grade-c';
+                case 'D': return 'grade-d';
+                case 'F': return 'grade-f';
+                default: return 'grade-f';
+            }
+        }
+
+        function addStudent(event) {
+            event.preventDefault();
+
+            const roll = document.getElementById('inpRoll').value;
+            const name = document.getElementById('inpName').value;
+            const fname = document.getElementById('inpFName').value;
+
+            const eng = parseInt(document.getElementById('inpEng').value) || 0;
+            const math = parseInt(document.getElementById('inpMath').value) || 0;
+            const urdu = parseInt(document.getElementById('inpUrdu').value) || 0;
+            const sci = parseInt(document.getElementById('inpSci').value) || 0;
+            const ss = parseInt(document.getElementById('inpSS').value) || 0;
+            const sindhi = parseInt(document.getElementById('inpSindhi').value) || 0;
+
+            const islTh = parseInt(document.getElementById('inpIslTh').value) || 0;
+            const islNz = parseInt(document.getElementById('inpIslNz').value) || 0;
+            const islTotal = islTh + islNz;
+
+            const isAbsent = document.getElementById('inpAbsent').checked;
+
+            const obtained = eng + math + urdu + sci + ss + islTotal + sindhi;
+            const total = 650;
+            const percentage = ((obtained / total) * 100).toFixed(1);
+            const grade = isAbsent ? 'F' : calculateGrade(parseFloat(percentage));
+
+            const newStudent = {
+                id: editingId ? editingId : Date.now(),
+                roll, name, fname,
+                isAbsent: isAbsent || false,
+                marks: {
+                    eng, math, urdu, sci, ss, sindhi,
+                    isl: { theory: islTh, nazra: islNz, total: islTotal }
+                },
+                total, obtained, percentage: percentage, grade
+            };
+
+            if (editingId) {
+                const index = students.findIndex(s => s.id === editingId);
+                if (index !== -1) students[index] = newStudent;
+                editingId = null;
+                const submitBtn = document.querySelector('.btn-add');
+                submitBtn.innerHTML = '+ Add Student to Result Sheet';
+                submitBtn.style.background = 'var(--success)';
+            } else {
+                students.push(newStudent);
+            }
+
+            saveStudentsData();
+            renderTable();
+            document.getElementById('studentForm').reset();
+            document.getElementById('inpRoll').focus();
+        }
+
+        function removeStudent(id) {
+            if (confirm("Are you sure you want to delete this student's record?")) {
+                students = students.filter(s => s.id !== id);
+                saveStudentsData();
+                renderTable();
+
+                if (editingId === id) {
+                    document.getElementById('studentForm').reset();
+                    editingId = null;
+                    const submitBtn = document.querySelector('.btn-add');
+                    submitBtn.innerHTML = '+ Add Student to Result Sheet';
+                    submitBtn.style.background = 'var(--success)';
+                }
+            }
+        }
+
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById('inpRoll').value = student.roll;
+            document.getElementById('inpName').value = student.name;
+            document.getElementById('inpFName').value = student.fname;
+
+            document.getElementById('inpEng').value = student.marks.eng;
+            document.getElementById('inpMath').value = student.marks.math;
+            document.getElementById('inpUrdu').value = student.marks.urdu;
+            document.getElementById('inpSci').value = student.marks.sci;
+            document.getElementById('inpSS').value = student.marks.ss;
+            document.getElementById('inpSindhi').value = student.marks.sindhi;
+            document.getElementById('inpIslTh').value = student.marks.isl.theory;
+            document.getElementById('inpIslNz').value = student.marks.isl.nazra;
+            document.getElementById('inpAbsent').checked = student.isAbsent || false;
+
+            editingId = id;
+
+            const submitBtn = document.querySelector('.btn-add');
+            submitBtn.innerHTML = '📝 Update Student Record';
+            submitBtn.style.background = 'var(--primary)';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleActionMenu(btn, event) {
+            event.stopPropagation();
+            const dropdown = btn.nextElementSibling;
+
+            // Close all others and reset row z-index
+            document.querySelectorAll('.ag-dropdown-new.show').forEach(menu => {
+                if (menu !== dropdown) {
+                    menu.classList.remove('show');
+                    if (menu.closest('tr')) menu.closest('tr').style.zIndex = '1';
+                    if (menu.closest('.actions-wrapper')) menu.closest('.actions-wrapper').style.zIndex = '1';
+                }
+            });
+
+            dropdown.classList.toggle('show');
+
+            // Elevate current row
+            if (dropdown.classList.contains('show')) {
+                btn.closest('tr').style.zIndex = '9999';
+                btn.closest('.actions-wrapper').style.zIndex = '9999';
+            } else {
+                btn.closest('tr').style.zIndex = '1';
+                btn.closest('.actions-wrapper').style.zIndex = '1';
+            }
+        }
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.actions-wrapper')) {
+                document.querySelectorAll('.ag-dropdown-new.show').forEach(menu => {
+                    menu.classList.remove('show');
+                    if (menu.closest('tr')) menu.closest('tr').style.zIndex = '1';
+                    if (menu.closest('.actions-wrapper')) menu.closest('.actions-wrapper').style.zIndex = '1';
+                });
+            }
+        });
+
+        function renderTable() {
+            const tbody = document.getElementById('studentList');
+            tbody.innerHTML = '';
+
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: #64748b; font-style: italic; padding: 30px;">No student records added yet. Please add data using the form above.</td></tr>';
+                return;
+            }
+
+            let filteredStudents = [...students];
+
+            if (searchTerm) {
+                filteredStudents = filteredStudents.filter(s =>
+                    String(s.roll).toLowerCase().includes(searchTerm) ||
+                    String(s.name).toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: #64748b; font-style: italic; padding: 30px;">No students found matching your search.</td></tr>';
+                return;
+            }
+
+            const sortedStudents = filteredStudents.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+            sortedStudents.forEach(student => {
+                const tr = document.createElement('tr');
+
+                const isFail = student.isAbsent || student.marks.eng < 40 || student.marks.math < 40 || student.marks.urdu < 40 || student.marks.sci < 40 || student.marks.ss < 40 || student.marks.isl.total < 40 || student.marks.sindhi < 20;
+
+                const getHtml = (mark, threshold) => student.isAbsent ? `<span class="print-ul" style="color:var(--danger); font-weight:800; font-size:12px;">ABS</span>` : (mark < threshold ? `<span class="print-ul" style="color:var(--danger)">${mark}</span>` : mark);
+
+                const engHtml = getHtml(student.marks.eng, 40);
+                const mathHtml = getHtml(student.marks.math, 40);
+                const urduHtml = getHtml(student.marks.urdu, 40);
+                const sciHtml = getHtml(student.marks.sci, 40);
+                const ssHtml = getHtml(student.marks.ss, 40);
+                const islHtml = getHtml(student.marks.isl.total, 40);
+                const sindhiHtml = getHtml(student.marks.sindhi, 20);
+
+                const gradeHtml = student.isAbsent ? `F` : (isFail ? `F` : student.grade);
+                const statusHtml = student.isAbsent ? `FAIL` : (isFail ? `FAIL` : `PASS`);
+
+                const cssGradeClass = student.isAbsent ? 'grade-f' : (isFail ? 'grade-f' : getGradeClass(student.grade));
+                const cssStatusClass = student.isAbsent ? 'status-fail' : (isFail ? 'status-fail' : 'status-pass');
+
+                tr.className = 'row-float';
+                tr.innerHTML = `
+                <td class="no-print" style="text-align: center;"><input type="checkbox" class="student-select" value="${student.id}"></td>
+                <td><strong>${student.roll}</strong></td>
+                <td><strong>${student.name}</strong></td>
+                <td>${engHtml}</td>
+                <td>${mathHtml}</td>
+                <td>${urduHtml}</td>
+                <td>${sciHtml}</td>
+                <td>${ssHtml}</td>
+                <td>${islHtml}</td>
+                <td>${sindhiHtml}</td>
+                <td><strong>${student.obtained}</strong></td>
+                <td><strong>${student.percentage}%</strong></td>
+                <td><div class="ag-grade-container"><span class="${student.isAbsent || isFail ? 'badge-f' : 'ag-badge ' + cssGradeClass}">${gradeHtml}</span></div></td>
+                <td class="action-btns no-print" style="overflow: visible;">
+                    <div class="actions-wrapper">
+                        <button class="btn-menu" onclick="toggleActionMenu(this, event)">
+                            ⚙️ Menu ▾
+                        </button>
+                        <div class="ag-dropdown-new">
+                            <div class="dropdown-item" onclick="downloadCard(${student.id})">🖨️ Print Card</div>
+                            <div class="dropdown-item" onclick="editStudent(${student.id})">✏️ Edit Record</div>
+                            <div class="dropdown-item" style="color: var(--danger);" onclick="removeStudent(${student.id})">🗑️ Delete</div>
+                        </div>
+                    </div>
+                </td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function downloadSheet() {
+            if (students.length === 0) {
+                alert("Please add student records first!");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // Header configuration
+            const title = "GBHSS YOUNUSABAD";
+            const subtitle = `${examConfig.examName} Result Sheet`;
+            const classText = `Class: ${examConfig.className} | Session: ${examConfig.sessionName}`;
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setTextColor(30, 58, 138); // Header color
+            doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(14);
+            doc.setTextColor(51, 51, 51);
+            doc.text(subtitle, doc.internal.pageSize.getWidth() / 2, 23, { align: 'center' });
+
+            doc.setFontSize(11);
+            doc.setTextColor(102, 102, 102);
+            doc.text(classText, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
+
+            doc.setDrawColor(30, 58, 138);
+            doc.setLineWidth(0.5);
+            doc.line(14, 34, doc.internal.pageSize.getWidth() - 14, 34);
+
+            const sortedStudents = [...students].sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+            const tableColumn = ["Roll No", "Student Name", "Eng", "Math", "Urdu", "Sci", "Social Studies", "Isl", "Sindhi", "Total", "%", "Grade"];
+            const tableRows = [];
+
+            sortedStudents.forEach(student => {
+                const isFail = student.marks.eng < 40 || student.marks.math < 40 || student.marks.urdu < 40 || student.marks.sci < 40 || student.marks.ss < 40 || student.marks.isl.total < 40 || student.marks.sindhi < 20;
+
+                const studentData = [
+                    student.roll,
+                    student.name,
+                    student.marks.eng,
+                    student.marks.math,
+                    student.marks.urdu,
+                    student.marks.sci,
+                    student.marks.ss,
+                    student.marks.isl.total,
+                    student.marks.sindhi,
+                    student.obtained,
+                    student.percentage + "%",
+                    isFail ? "F" : student.grade
+                ];
+                tableRows.push(studentData);
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 40,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [248, 250, 252],
+                    textColor: [100, 116, 139],
+                    fontStyle: 'bold',
+                    cellPadding: 4
+                },
+                columnStyles: {
+                    0: { fontStyle: 'bold' },
+                    1: { fontStyle: 'bold' },
+                    9: { fontStyle: 'bold' },
+                    10: { fontStyle: 'bold' },
+                    11: { fontStyle: 'bold' }
+                },
+                didParseCell: function (data) {
+                    // Check for FAIL indicators to color individual cells text red
+                    if (data.section === 'body') {
+                        const isFailRow = data.row.raw[11] === 'F';
+
+                        // Failing subjects marks in red
+                        if (data.column.index >= 2 && data.column.index <= 7) {
+                            if (data.cell.raw < 40) data.cell.styles.textColor = [220, 38, 38];
+                        }
+                        // Sindhi fail marks
+                        if (data.column.index === 8 && data.cell.raw < 20) data.cell.styles.textColor = [220, 38, 38];
+
+                        // Grade column
+                        if (data.column.index === 11) {
+                            if (isFailRow) {
+                                data.cell.styles.textColor = [220, 38, 38];
+                            } else {
+                                data.cell.styles.textColor = [22, 101, 52];
+                            }
+                        }
+                    }
+                },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3,
+                    textColor: [30, 41, 59],
+                    lineColor: [226, 232, 240]
+                },
+                margin: { top: 35, left: 14, right: 14 }
+            });
+
+            doc.save(`${examConfig.className}-Result-Sheet.pdf`);
+        }
+
+        async function downloadCard(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById('cardName').innerText = student.name;
+            document.getElementById('cardFName').innerText = student.fname;
+            document.getElementById('cardRoll').innerText = student.roll;
+
+            const isFail = student.isAbsent || student.marks.eng < 40 || student.marks.math < 40 || student.marks.urdu < 40 || student.marks.sci < 40 || student.marks.ss < 40 || student.marks.isl.total < 40 || student.marks.sindhi < 20;
+
+            const gradeEl = document.getElementById('cardGrade');
+            const actualGrade = student.isAbsent ? 'F' : ((isFail || student.grade === 'F') ? 'F' : (student.grade || calculateGrade(student.percentage || 0) || "F"));
+
+            if (actualGrade === 'F') {
+                const cStatus = document.getElementById('cStatus');
+                if (cStatus) cStatus.innerHTML = '';
+
+                gradeEl.innerHTML = 'F';
+                gradeEl.className = 'ag-grade-badge';
+                gradeEl.style.cssText = 'background: rgba(255, 71, 71, 0.15); color: #ff4747; border: 1px solid rgba(255, 71, 71, 0.3);';
+            } else {
+                const cStatus = document.getElementById('cStatus');
+                if (cStatus) cStatus.innerHTML = '';
+
+                gradeEl.innerHTML = actualGrade;
+                gradeEl.className = 'ag-grade-badge';
+
+                if (actualGrade === 'A+') gradeEl.style.cssText = 'background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3);';
+                else if (actualGrade === 'A') gradeEl.style.cssText = 'background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);';
+                else if (actualGrade === 'B') gradeEl.style.cssText = 'background: rgba(37, 99, 235, 0.15); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.3);';
+                else if (actualGrade === 'C') gradeEl.style.cssText = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);';
+                else if (actualGrade === 'D') gradeEl.style.cssText = 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
+                else gradeEl.style.cssText = 'background: rgba(255, 71, 71, 0.15); color: #ff4747; border: 1px solid rgba(255, 71, 71, 0.3);';
+            }
+
+            const renderMark = (mark, threshold) => student.isAbsent ? `<span class="text-red-700 font-bold text-[13px] tracking-wider">ABS</span>` : (mark < threshold ? `<span class="print-ul text-red-600">${mark}</span>` : mark);
+            const renderRemark = (mark, threshold) => student.isAbsent ? `<span class="text-red-600 font-bold uppercase tracking-wide text-[10px]">ABSENT</span>` : getRemark(mark, threshold);
+
+            document.getElementById('mEng').innerHTML = renderMark(student.marks.eng, 40);
+            document.getElementById('rmEng').innerHTML = renderRemark(student.marks.eng, 40);
+
+            document.getElementById('mMath').innerHTML = renderMark(student.marks.math, 40);
+            document.getElementById('rmMath').innerHTML = renderRemark(student.marks.math, 40);
+
+            document.getElementById('mUrdu').innerHTML = renderMark(student.marks.urdu, 40);
+            document.getElementById('rmUrdu').innerHTML = renderRemark(student.marks.urdu, 40);
+
+            document.getElementById('mSci').innerHTML = renderMark(student.marks.sci, 40);
+            document.getElementById('rmSci').innerHTML = renderRemark(student.marks.sci, 40);
+
+            document.getElementById('mSS').innerHTML = renderMark(student.marks.ss, 40);
+            document.getElementById('rmSS').innerHTML = renderRemark(student.marks.ss, 40);
+
+            document.getElementById('mIslTotal').innerHTML = renderMark(student.marks.isl.total, 40);
+            document.getElementById('mIslSplit').innerText = student.isAbsent ? '' : `(Th: ${student.marks.isl.theory}, Nz: ${student.marks.isl.nazra})`;
+            document.getElementById('rmIsl').innerHTML = renderRemark(student.marks.isl.total, 40);
+
+            document.getElementById('mSindhi').innerHTML = renderMark(student.marks.sindhi, 20);
+            document.getElementById('rmSindhi').innerHTML = renderRemark(student.marks.sindhi, 20);
+
+            document.getElementById('cTotal').innerText = student.isAbsent ? '0' : student.obtained;
+            document.getElementById('cPerc').innerText = student.isAbsent ? '0.0' : student.percentage;
+
+            const elementContainer = document.getElementById('resultCardContainer');
+            const element = document.getElementById('resultCard');
+
+            elementContainer.style.display = 'block';
+            elementContainer.style.left = '0px';
+
+            element.classList.add('pdf-mode');
+
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL("image/png");
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF("p", "mm", "a4");
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const imgWidth = pageWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+                pdf.save('Class-4-Result-Card-' + student.roll + '.pdf');
+            } catch (error) {
+                console.error("PDF Generation error", error);
+                alert("Error generating PDF: " + (error.message || error));
+            } finally {
+                element.classList.remove('pdf-mode');
+                elementContainer.style.display = 'none';
+            }
+        }
+
+        function toggleAll() {
+            const selectAll = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.student-select').forEach(cb => cb.checked = selectAll);
+        }
+
+        async function downloadSelectedCards() {
+            const selectedIds = Array.from(document.querySelectorAll('.student-select:checked')).map(cb => Number(cb.value));
+            if (selectedIds.length === 0) {
+                alert("Please check at least one student's box from the table to print!");
+                return;
+            }
+
+            const btn = document.getElementById('btnDownloadAll');
+            const oldText = btn.innerText;
+            btn.innerText = "Processing... Please wait";
+            btn.disabled = true;
+
+            const selectedStudents = students.filter(s => selectedIds.includes(s.id)).sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("l", "mm", "a4");
+
+            let countOnPage = 0;
+            const elementContainer = document.getElementById('resultCardContainer');
+            const element = document.getElementById('resultCard');
+
+            try {
+                for (let i = 0; i < selectedStudents.length; i++) {
+                    const student = selectedStudents[i];
+
+                    // Prepare DOM exactly like single card download
+                    document.getElementById('cardName').innerText = student.name;
+                    document.getElementById('cardFName').innerText = student.fname;
+                    document.getElementById('cardRoll').innerText = student.roll;
+
+                    const isFail = student.marks.eng < 40 || student.marks.math < 40 || student.marks.urdu < 40 || student.marks.sci < 40 || student.marks.ss < 40 || student.marks.isl.total < 40 || student.marks.sindhi < 20;
+
+                    const gradeEl = document.getElementById('cardGrade');
+                    const actualGrade = (isFail || student.grade === 'F') ? 'F' : (student.grade || calculateGrade(student.percentage || 0) || "F");
+
+                    if (actualGrade === 'F') {
+                        const cStatus = document.getElementById('cStatus');
+                        if (cStatus) cStatus.innerHTML = '';
+
+                        gradeEl.innerHTML = 'F';
+                        gradeEl.className = 'ag-grade-badge';
+                        gradeEl.style.cssText = 'background: rgba(255, 71, 71, 0.15); color: #ff4747; border: 1px solid rgba(255, 71, 71, 0.3);';
+                    } else {
+                        const cStatus = document.getElementById('cStatus');
+                        if (cStatus) cStatus.innerHTML = '';
+
+                        gradeEl.innerHTML = actualGrade;
+                        gradeEl.className = 'ag-grade-badge';
+
+                        if (actualGrade === 'A+') gradeEl.style.cssText = 'background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3);';
+                        else if (actualGrade === 'A') gradeEl.style.cssText = 'background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);';
+                        else if (actualGrade === 'B') gradeEl.style.cssText = 'background: rgba(37, 99, 235, 0.15); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.3);';
+                        else if (actualGrade === 'C') gradeEl.style.cssText = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);';
+                        else if (actualGrade === 'D') gradeEl.style.cssText = 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
+                        else gradeEl.style.cssText = 'background: rgba(255, 71, 71, 0.15); color: #ff4747; border: 1px solid rgba(255, 71, 71, 0.3);';
+                    }
+
+                    document.getElementById('mEng').innerHTML = student.marks.eng < 40 ? `<span class="print-ul text-red-600">${student.marks.eng}</span>` : student.marks.eng;
+                    document.getElementById('rmEng').innerHTML = getRemark(student.marks.eng, 100);
+                    document.getElementById('mMath').innerHTML = student.marks.math < 40 ? `<span class="print-ul text-red-600">${student.marks.math}</span>` : student.marks.math;
+                    document.getElementById('rmMath').innerHTML = getRemark(student.marks.math, 100);
+                    document.getElementById('mUrdu').innerHTML = student.marks.urdu < 40 ? `<span class="print-ul text-red-600">${student.marks.urdu}</span>` : student.marks.urdu;
+                    document.getElementById('rmUrdu').innerHTML = getRemark(student.marks.urdu, 100);
+                    document.getElementById('mSci').innerHTML = student.marks.sci < 40 ? `<span class="print-ul text-red-600">${student.marks.sci}</span>` : student.marks.sci;
+                    document.getElementById('rmSci').innerHTML = getRemark(student.marks.sci, 100);
+                    document.getElementById('mSS').innerHTML = student.marks.ss < 40 ? `<span class="print-ul text-red-600">${student.marks.ss}</span>` : student.marks.ss;
+                    document.getElementById('rmSS').innerHTML = getRemark(student.marks.ss, 100);
+                    document.getElementById('mIslTotal').innerHTML = student.marks.isl.total < 40 ? `<span class="print-ul text-red-600">${student.marks.isl.total}</span>` : student.marks.isl.total;
+                    document.getElementById('mIslSplit').innerText = `(Th: ${student.marks.isl.theory}, Nz: ${student.marks.isl.nazra})`;
+                    document.getElementById('rmIsl').innerHTML = getRemark(student.marks.isl.total, 100);
+                    document.getElementById('mSindhi').innerHTML = student.marks.sindhi < 20 ? `<span class="print-ul text-red-600">${student.marks.sindhi}</span>` : student.marks.sindhi;
+                    document.getElementById('rmSindhi').innerHTML = getRemark(student.marks.sindhi, 50);
+
+                    document.getElementById('cTotal').innerText = student.obtained;
+                    document.getElementById('cPerc').innerText = student.percentage + '%';
+
+                    elementContainer.style.display = 'block';
+                    elementContainer.style.left = '0px';
+                    element.classList.add('pdf-mode');
+
+                    // Convert to scaled JPEG instead of PNG to aggressively prevent memory / Invalid string length crashes
+                    const canvas = await html2canvas(element, { scale: 1.5, useCORS: true });
+                    const imgData = canvas.toDataURL("image/jpeg", 0.8);
+
+                    // scale card to exactly fit half of landscape A4 (height is 210, width is 297, half is 148.5)
+                    // max height we can take on a landscape A4 is 200 (leaving 5mm padding top and bottom)
+                    const imgHeight = 200;
+                    const imgWidth = (canvas.width * imgHeight) / canvas.height;
+
+                    let xPosition = 5;
+                    if (countOnPage === 1) {
+                        xPosition = 148.5 + 5; // Second card shifts to the right half
+                    }
+
+                    if (countOnPage === 0 && i > 0) {
+                        pdf.addPage();
+                    }
+
+                    pdf.addImage(imgData, "JPEG", xPosition, 5, imgWidth, imgHeight);
+
+                    countOnPage++;
+                    if (countOnPage > 1) {
+                        countOnPage = 0; // ready for new page next iteration
+                    }
+
+                    element.classList.remove('pdf-mode');
+                    elementContainer.style.left = '-9999px';
+                }
+
+                pdf.save(`Selected-Result-Cards-${examConfig.className}.pdf`);
+
+            } catch (error) {
+                console.error("PDF Bulk Generation error", error);
+                alert("Error during bulk generation: " + (error.message || error));
+            } finally {
+                element.classList.remove('pdf-mode');
+                elementContainer.style.display = 'none';
+                btn.innerText = oldText;
+                btn.disabled = false;
+            }
+        }
+
+        function openBulkModal() {
+            document.getElementById('bulkModal').style.display = 'flex';
+        }
+
+        function closeBulkModal() {
+            document.getElementById('bulkModal').style.display = 'none';
+            document.getElementById('bulkData').value = '';
+        }
+
+        function importBulkStudents() {
+            const data = document.getElementById('bulkData').value;
+            const lines = data.split('\n');
+            let importedCount = 0;
+            let skippedCount = 0;
+
+            lines.forEach(line => {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length < 3) {
+                    if (line.trim() !== '') skippedCount++;
+                    return;
+                }
+
+                const roll = parts[0];
+                const name = parts[1];
+                const fname = parts[2];
+
+                if (!roll || !name || !fname) {
+                    skippedCount++;
+                    return;
+                }
+
+                if (students.find(s => String(s.roll) === String(roll))) {
+                    skippedCount++;
+                    return;
+                }
+
+                const newStudent = {
+                    id: Date.now() + Math.random(),
+                    roll, name, fname,
+                    marks: {
+                        eng: 0, math: 0, urdu: 0, sci: 0, ss: 0, sindhi: 0,
+                        isl: { theory: 0, nazra: 0, total: 0 }
+                    },
+                    total: 650, obtained: 0, percentage: "0.0", grade: "F"
+                };
+
+                students.push(newStudent);
+                importedCount++;
+            });
+
+            if (importedCount > 0) {
+                saveStudentsData();
+                renderTable();
+                alert(`Students imported successfully!\n\nImported: ${importedCount} student(s)\nSkipped/Duplicate: ${skippedCount} line(s)`);
+                closeBulkModal();
+            } else {
+                alert(`No students were imported.\nPlease ensure the format is correct.\n\nSkipped/Duplicate: ${skippedCount} line(s)`);
+            }
+        }
+
+        function loadSelectedDB() {
+            const val = document.getElementById('existingDBSelect').value;
+            if (!val) return;
+            // value is stringified JSON containing className, sectionName, sessionName
+            const data = JSON.parse(val);
+            document.getElementById('confClassName').value = data.className || '';
+            document.getElementById('confSectionName').value = data.sectionName || '';
+            document.getElementById('confSessionName').value = data.sessionName || '';
+        }
+
+        function deleteSelectedDB() {
+            const val = document.getElementById('existingDBSelect').value;
+            if (!val) {
+                alert("Please select an existing class record to delete first.");
+                return;
+            }
+            if (confirm("🚨 WARNING: Are you sure you want to PERMANENTLY DELETE this entire class record? This cannot be undone!")) {
+                const data = JSON.parse(val);
+                const classN = data.className || '';
+                const sectionN = data.sectionName || '';
+                const sessionN = data.sessionName || '';
+                const keyToDelete = `studentsData_${classN}_${sectionN}_${sessionN}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+                localStorage.removeItem(keyToDelete);
+
+                if (keyToDelete === currentDBKey) {
+                    // Deleted the currently active DB
+                    students = [];
+                    saveStudentsData();
+                    window.location.reload();
+                } else {
+                    alert("Class record deleted successfully.");
+                    openConfigModal(); // Re-opens and refreshes the list
+                }
+            }
+        }
+
+
+        function openConfigModal() {
+            document.getElementById('confExamName').value = examConfig.examName;
+            document.getElementById('confClassName').value = examConfig.className;
+            document.getElementById('confSectionName').value = examConfig.sectionName;
+            document.getElementById('confSessionName').value = examConfig.sessionName;
+
+            // Load all available DBs into dropdown
+            const select = document.getElementById('existingDBSelect');
+            select.innerHTML = '<option value="">-- Start New or Select Existing --</option>';
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('studentsData_')) {
+                    // Extract parts from key format: studentsData_CLASS_SECTION_SESSION
+                    const parts = key.split('_');
+                    if (parts.length >= 4) {
+                        const classN = parts[1];
+                        const sectionN = parts[2];
+                        const sessionN = parts.slice(3).join('_'); // Rejoin session in case it has underscores
+
+                        // Check if this DB actually has any saved students to keep list clean
+                        const count = (JSON.parse(localStorage.getItem(key)) || []).length;
+                        if (count > 0) {
+                            const option = document.createElement('option');
+                            const sectStr = sectionN ? ` (${sectionN})` : '';
+                            option.text = `Class: ${classN}${sectStr} | Session: ${sessionN} - [${count} Students]`;
+                            option.value = JSON.stringify({ className: classN, sectionName: sectionN, sessionName: sessionN });
+                            select.appendChild(option);
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('configModal').style.display = 'flex';
+        }
+
+        function closeConfigModal() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+
+        function saveConfig() {
+            examConfig.examName = document.getElementById('confExamName').value || 'Final Examination';
+            examConfig.className = document.getElementById('confClassName').value || '4';
+            examConfig.sectionName = document.getElementById('confSectionName').value || '';
+            examConfig.sessionName = document.getElementById('confSessionName').value || '2025-2026';
+
+            localStorage.setItem('examConfig', JSON.stringify(examConfig));
+
+            // Reload database pointer when config changes
+            currentDBKey = getStorageKey();
+            students = JSON.parse(localStorage.getItem(currentDBKey)) || [];
+
+            renderHeader();
+            renderTable();
+            closeConfigModal();
+        }
+
+        function renderFastEntryList() {
+            const subject = document.getElementById('fastSubjectSelect').value;
+            const container = document.getElementById('fastEntryContainer');
+            if (!subject) {
+                container.innerHTML = '<div style="text-align:center; color:#64748b; font-style:italic; margin-top:30px;">Select a subject to start entering marks.</div>';
+                return;
+            }
+
+            if (students.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#64748b; font-style:italic; margin-top:30px;">No students found. Please add students first.</div>';
+                return;
+            }
+
+            const sortedStudents = [...students].sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+            let html = '<table style="width:100%; text-align:left; border-collapse:collapse;">';
+            html += '<thead><tr style="background:#f1f5f9; position:sticky; top:0; z-index:10;"><th style="padding:10px; border-bottom:2px solid #e2e8f0; color:#334155; font-size:13px;">Roll No</th><th style="padding:10px; border-bottom:2px solid #e2e8f0; color:#334155; font-size:13px;">Student Name</th><th style="padding:10px; border-bottom:2px solid #e2e8f0; color:#334155; font-size:13px;">Marks</th></tr></thead><tbody>';
+
+            sortedStudents.forEach(student => {
+                let currentMark = '';
+                if (subject === 'isl_th') currentMark = student.marks.isl.theory || '';
+                else if (subject === 'isl_nz') currentMark = student.marks.isl.nazra || '';
+                else currentMark = student.marks[subject] || '';
+
+                if (currentMark === 0 && student.obtained === 0) currentMark = ''; // Keep empty if completely raw
+
+                html += `<tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px; font-weight:bold; font-size:14px; vertical-align:middle;">${student.roll}</td>
+                    <td style="padding:10px; font-size:14px; vertical-align:middle;">${student.name}</td>
+                    <td style="padding:10px; vertical-align:middle;"><input type="number" data-id="${student.id}" data-subject="${subject}" class="fast-mark-input" style="width:100px; border:1.5px solid #cbd5e1; border-radius:6px; padding:6px; text-align:center; transition:0.3s; font-size:14px; font-weight:bold; outline:none;" value="${currentMark}" min="0" placeholder="0"></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.fast-mark-input');
+                if (inputs.length > 0) inputs[0].focus();
+
+                inputs.forEach((input, index) => {
+                    input.addEventListener('focus', function () {
+                        this.style.borderColor = 'var(--primary)';
+                        this.style.backgroundColor = '#eff6ff';
+                        this.select();
+                    });
+                    input.addEventListener('blur', function () {
+                        this.style.borderColor = '#cbd5e1';
+                        this.style.backgroundColor = 'white';
+                    });
+
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (index + 1 < inputs.length) {
+                                inputs[index + 1].focus();
+                            } else {
+                                saveFastEntry();
+                            }
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            if (index - 1 >= 0) inputs[index - 1].focus();
+                        }
+                    });
+                });
+            }, 100);
+        }
+
+        function saveFastEntry() {
+            const inputs = document.querySelectorAll('.fast-mark-input');
+            if (inputs.length === 0) return closeFastEntryModal();
+
+            inputs.forEach(input => {
+                const id = Number(input.getAttribute('data-id'));
+                const subject = input.getAttribute('data-subject');
+                let val = parseInt(input.value) || 0;
+
+                let student = students.find(s => s.id === id);
+                if (student) {
+                    if (subject === 'isl_th') student.marks.isl.theory = val;
+                    else if (subject === 'isl_nz') student.marks.isl.nazra = val;
+                    else student.marks[subject] = val;
+
+                    if (subject === 'isl_th' || subject === 'isl_nz') {
+                        student.marks.isl.total = student.marks.isl.theory + student.marks.isl.nazra;
+                    }
+
+                    student.obtained = student.marks.eng + student.marks.math + student.marks.urdu + student.marks.sci + student.marks.ss + student.marks.sindhi + student.marks.isl.total;
+                    student.percentage = parseFloat(((student.obtained / 650) * 100).toFixed(1));
+                    student.grade = calculateGrade(student.percentage);
+                }
+            });
+
+            saveStudentsData();
+            renderTable();
+            closeFastEntryModal();
+
+            const suc = document.createElement('div');
+            suc.style.cssText = "position:fixed; bottom:20px; right:20px; background:var(--success); color:white; padding:15px 25px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); z-index:9999;";
+            suc.innerHTML = "<strong>✅ Marks Saved Successfully!</strong>";
+            document.body.appendChild(suc);
+            setTimeout(() => suc.remove(), 2500);
+        }
+
+        function openFastEntryModal() {
+            document.getElementById('fastSubjectSelect').value = '';
+            document.getElementById('fastEntryContainer').innerHTML = '<div style="text-align:center; color:#64748b; font-style:italic; margin-top:30px;">Select a subject to start entering marks.</div>';
+            document.getElementById('fastEntryModal').style.display = 'flex';
+        }
+
+        function closeFastEntryModal() {
+            document.getElementById('fastEntryModal').style.display = 'none';
+        }
+
+        function resetFastEntryMarks() {
+            const inputs = document.querySelectorAll('.fast-mark-input');
+            if (inputs.length === 0) return;
+
+            if (confirm("Are you sure you want to reset all marks for this subject to 0?")) {
+                inputs.forEach(input => {
+                    input.value = 0;
+                });
+                // Focus first input to easily continue
+                inputs[0].focus();
+            }
+        }
+
+        renderHeader();
+        renderTable();
+    </script>
+
+    <!-- Config Add Modal -->
+    <div id="configModal" class="no-print"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div
+            style="background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h2
+                style="font-size: 18px; font-weight: 600; color: var(--primary); margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                Exam Settings / Details</h2>
+
+            <div
+                style="margin-bottom: 15px; background: #eff6ff; padding: 10px; border-radius: 8px; border: 1px solid #bfdbfe;">
+                <label
+                    style="font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 5px; display: block;">📂
+                    Load Existing Class Record</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="existingDBSelect" onchange="loadSelectedDB()"
+                        style="flex: 1; padding: 8px; border: 1.5px solid #bfdbfe; border-radius: 6px; font-size: 13px; outline: none; background: white; cursor: pointer;">
+                        <option value="">-- Start New or Select Existing --</option>
+                    </select>
+                    <button type="button" onclick="deleteSelectedDB()"
+                        style="padding: 8px 12px; border: none; border-radius: 6px; background: var(--danger); color: white; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap;">🗑️
+                        Delete</button>
+                </div>
+                <p style="font-size: 10px; color: #64748b; margin: 4px 0 0 0;">(Don't worry, your old data is safe! Just
+                    select it from here)</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="form-group">
+                    <label style="font-size: 12px; color: var(--secondary); margin-bottom: 5px;">Exam Name (e.g. Mid
+                        Term, Annual)</label>
+                    <input type="text" id="confExamName"
+                        style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; color: var(--secondary); margin-bottom: 5px;">Class Name (e.g. IV
+                        (B), 9th)</label>
+                    <input type="text" id="confClassName"
+                        style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; color: var(--secondary); margin-bottom: 5px;">Section / Group (e.g.
+                        Boys, Girls)</label>
+                    <input type="text" id="confSectionName" placeholder="Leave blank if none"
+                        style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px; color: var(--secondary); margin-bottom: 5px;">Session (e.g.
+                        2025-2026)</label>
+                    <input type="text" id="confSessionName"
+                        style="padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeConfigModal()"
+                    style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; border: none; background: #e2e8f0; color: #475569; transition: 0.3s;">Cancel</button>
+                <button type="button" onclick="saveConfig()"
+                    style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; border: none; background: var(--primary); color: white; transition: 0.3s;">Save
+                    Config</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Add Modal -->
+    <div id="bulkModal" class="no-print"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div
+            style="background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h2
+                style="font-size: 18px; font-weight: 600; color: var(--primary); margin-top: 0; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                Bulk Add Students</h2>
+            <p style="font-size: 13px; color: var(--secondary); margin-bottom: 15px;">Paste student details in this
+                format (1 per line):<br><strong style="color:#1e293b;">Roll No, Student Name, Father Name</strong>
+            </p>
+            <textarea id="bulkData" rows="8"
+                style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 13px; outline: none; transition: 0.3s; resize: vertical; box-sizing: border-box;"
+                placeholder="1, Haseeb, M. Siraj&#10;2, Affan, Naeem&#10;3, Usman, Munawar"></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeBulkModal()"
+                    style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; border: none; background: #e2e8f0; color: #475569; transition: 0.3s;">Cancel</button>
+                <button type="button" onclick="importBulkStudents()"
+                    style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; border: none; background: var(--success); color: white; transition: 0.3s;">Import
+                    Students</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fast Entry Modal -->
+    <div id="fastEntryModal" class="no-print"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div
+            style="background: white; width: 90%; max-width: 600px; max-height: 85vh; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 style="font-size: 18px; font-weight: 600; color: var(--primary); margin: 0;">⚡ Fast Subject-wise
+                    Marks Entry</h2>
+                <button type="button" onclick="closeFastEntryModal()"
+                    style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; font-weight: bold; outline: none;">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--secondary);">Select Subject:</label>
+                <select id="fastSubjectSelect" onchange="renderFastEntryList()"
+                    style="flex: 1; padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #f8fafc; font-weight: bold; color: #334155;">
+                    <option value="">-- Choose Subject --</option>
+                    <option value="eng">English (100)</option>
+                    <option value="math">Mathematics (100)</option>
+                    <option value="urdu">Urdu (100)</option>
+                    <option value="sci">Science (100)</option>
+                    <option value="ss">Social Studies (100)</option>
+                    <option value="sindhi">Sindhi (50)</option>
+                    <option value="isl_th">Islamiat Theory (75)</option>
+                    <option value="isl_nz">Islamiat Nazra (25)</option>
+                </select>
+                <button type="button" onclick="resetFastEntryMarks()"
+                    style="padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: #fff1f2; color: #e11d48; border: 1.5px solid #fecdd3; transition: 0.3s; white-space: nowrap;">Reset
+                    to 0</button>
+            </div>
+
+            <div id="fastEntryContainer"
+                style="flex: 1; overflow-y: auto; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #f8fafc; padding: 0; min-height: 250px;">
+                <!-- Table renders here -->
+                <div style="text-align:center; color:#64748b; font-style:italic; margin-top:30px;">Select a subject
+                    to
+                    start entering marks.</div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="font-size: 12px; color: #64748b; font-style: italic;">Tip: Press <kbd
+                        style="background:#e2e8f0; border:1px solid #cbd5e1; padding:2px 5px; border-radius:4px; font-family:monospace; font-weight:bold;">Enter
+                        &crarr;</kbd> to rapidly type and jump to the next student.</div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="closeFastEntryModal()"
+                        style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; border: none; background: #e2e8f0; color: #475569; transition: 0.3s;">Cancel</button>
+                    <button type="button" onclick="saveFastEntry()"
+                        style="padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; border: none; background: var(--success); color: white; transition: 0.3s;">Save
+                        All Marks</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Custom script to import 61 PDF students
+        const pdfStudents = [
+            { "rollNo": 1, "studentName": "Haseeb", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 14, "sindhi": 0, "nazra": 0, "total": 14, "percentage": "2.2%", "grade": "F" },
+            { "rollNo": 2, "studentName": "Affan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 9, "sindhi": 0, "nazra": 0, "total": 9, "percentage": "1.4%", "grade": "F" },
+            { "rollNo": 3, "studentName": "Usman", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 4, "studentName": "Azan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 12, "sindhi": 0, "nazra": 0, "total": 12, "percentage": "1.8%", "grade": "F" },
+            { "rollNo": 5, "studentName": "Ayan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 6, "sindhi": 0, "nazra": 0, "total": 6, "percentage": "0.9%", "grade": "F" },
+            { "rollNo": 6, "studentName": "Abdul Moiz", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 7, "studentName": "Hammad", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 8, "studentName": "Jahanzaib", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 4, "sindhi": 0, "nazra": 0, "total": 4, "percentage": "0.6%", "grade": "F" },
+            { "rollNo": 9, "studentName": "Shahzad", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 10, "studentName": "Muneeb", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+
+            { "rollNo": 11, "studentName": "Subhan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 2, "sindhi": 0, "nazra": 0, "total": 2, "percentage": "0.3%", "grade": "F" },
+            { "rollNo": 12, "studentName": "Muzammil", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 3, "sindhi": 0, "nazra": 0, "total": 3, "percentage": "0.5%", "grade": "F" },
+            { "rollNo": 13, "studentName": "Shayan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 14, "sindhi": 0, "nazra": 0, "total": 14, "percentage": "2.2%", "grade": "F" },
+            { "rollNo": 14, "studentName": "Areeb", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 15, "studentName": "Basit", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 16, "studentName": "Sufyan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 13, "sindhi": 0, "nazra": 0, "total": 13, "percentage": "2.0%", "grade": "F" },
+            { "rollNo": 17, "studentName": "Ahsan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 18, "studentName": "Hamza", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 2, "sindhi": 0, "nazra": 0, "total": 2, "percentage": "0.3%", "grade": "F" },
+            { "rollNo": 19, "studentName": "Adeel", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 20, "studentName": "Rafay", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+
+            { "rollNo": 21, "studentName": "Mohid", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 22, "studentName": "Arham", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 23, "studentName": "Haris", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 24, "studentName": "Anas", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 25, "studentName": "Fahad", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 26, "studentName": "Ayan Ali", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 27, "studentName": "Abdullah", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 28, "studentName": "Zayan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 4, "sindhi": 0, "nazra": 0, "total": 4, "percentage": "0.6%", "grade": "F" },
+            { "rollNo": 29, "studentName": "Huzaifa", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 3, "sindhi": 0, "nazra": 0, "total": 3, "percentage": "0.5%", "grade": "F" },
+            { "rollNo": 30, "studentName": "Talha", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 13, "sindhi": 0, "nazra": 0, "total": 13, "percentage": "2.0%", "grade": "F" },
+
+            { "rollNo": 31, "studentName": "Daniyal", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 32, "studentName": "Maaz", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 33, "studentName": "Aman", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 34, "studentName": "Saad", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 3, "sindhi": 0, "nazra": 0, "total": 3, "percentage": "0.5%", "grade": "F" },
+            { "rollNo": 35, "studentName": "Hashir", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 36, "studentName": "Shahmeer", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 37, "studentName": "Afaq", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 38, "studentName": "Taimoor", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 13, "sindhi": 0, "nazra": 0, "total": 13, "percentage": "2.0%", "grade": "F" },
+            { "rollNo": 39, "studentName": "Salar", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 40, "studentName": "Rameez", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 4, "sindhi": 0, "nazra": 0, "total": 4, "percentage": "0.6%", "grade": "F" },
+
+            { "rollNo": 41, "studentName": "Arsalan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 3, "sindhi": 0, "nazra": 0, "total": 3, "percentage": "0.5%", "grade": "F" },
+            { "rollNo": 42, "studentName": "Rayan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 2, "sindhi": 0, "nazra": 0, "total": 2, "percentage": "0.3%", "grade": "F" },
+            { "rollNo": 43, "studentName": "Zaryab", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 44, "studentName": "Ubaid", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 45, "studentName": "Areez", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 46, "studentName": "Sami", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 12, "sindhi": 0, "nazra": 0, "total": 12, "percentage": "1.8%", "grade": "F" },
+            { "rollNo": 47, "studentName": "Rizwan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 2, "sindhi": 0, "nazra": 0, "total": 2, "percentage": "0.3%", "grade": "F" },
+            { "rollNo": 48, "studentName": "Mikail", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 49, "studentName": "Aizaz", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 50, "studentName": "Aahil", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+
+            { "rollNo": 51, "studentName": "Zain", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 52, "studentName": "Rayyan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 53, "studentName": "Aabis", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 54, "studentName": "Abyan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 55, "studentName": "Musa", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 2, "sindhi": 0, "nazra": 0, "total": 2, "percentage": "0.3%", "grade": "F" },
+            { "rollNo": 56, "studentName": "Sarmad", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 57, "studentName": "Abdullah Hasan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 14, "sindhi": 0, "nazra": 0, "total": 14, "percentage": "2.2%", "grade": "F" },
+            { "rollNo": 58, "studentName": "Ayaan", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 0, "sindhi": 0, "nazra": 0, "total": 0, "percentage": "0%", "grade": "F" },
+            { "rollNo": 59, "studentName": "Ibrahim", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 3, "sindhi": 0, "nazra": 0, "total": 3, "percentage": "0.5%", "grade": "F" },
+            { "rollNo": 60, "studentName": "Haris Ali", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 1, "sindhi": 0, "nazra": 0, "total": 1, "percentage": "0.2%", "grade": "F" },
+            { "rollNo": 61, "studentName": "Ayan Raza", "fatherName": "", "english": 0, "math": 0, "urdu": 0, "science": 0, "socialStudies": 0, "islamiat": 13, "sindhi": 0, "nazra": 0, "total": 13, "percentage": "2.0%", "grade": "F" }
+        ];
+
+        function importSpecStudentsOverride() {
+            const mergedMap = new Map();
+
+            students.forEach(st => {
+                mergedMap.set(String(st.roll), st);
+            });
+
+            pdfStudents.forEach(pSt => {
+                const eng = Number(pSt.english) || 0;
+                const math = Number(pSt.math) || 0;
+                const urdu = Number(pSt.urdu) || 0;
+                const sci = Number(pSt.science) || 0;
+                const ss = Number(pSt.socialStudies) || 0;
+                const islTh = Number(pSt.islamiat) || 0;
+                const islNz = Number(pSt.nazra) || 0;
+                const islTotal = islTh + islNz;
+                const sindhi = Number(pSt.sindhi) || 0;
+
+                const obtained = eng + math + urdu + sci + ss + islTotal + sindhi;
+                const percentage = ((obtained / 650) * 100).toFixed(1);
+                const grade = calculateGrade(percentage);
+
+                const newSt = {
+                    id: Date.now() + Math.random(),
+                    roll: pSt.rollNo,
+                    name: pSt.studentName,
+                    fname: pSt.fatherName || "-",
+                    isAbsent: false,
+                    marks: {
+                        eng, math, urdu, sci, ss, sindhi,
+                        isl: { theory: islTh, nazra: islNz, total: islTotal }
+                    },
+                    total: 650,
+                    obtained,
+                    percentage,
+                    grade
+                };
+
+                if (mergedMap.has(String(pSt.rollNo))) {
+                    newSt.id = mergedMap.get(String(pSt.rollNo)).id;
+                }
+
+                mergedMap.set(String(pSt.rollNo), newSt);
+            });
+
+            students = Array.from(mergedMap.values()).sort((a, b) => Number(a.roll) - Number(b.roll));
+            saveStudentsData();
+            renderTable();
+            alert("61 Students successfully import ho gaye!");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const headerBtns = document.querySelector(".header-btns");
+            if (headerBtns) {
+                const impBtn = document.createElement("button");
+                impBtn.className = "glass-btn";
+                impBtn.style.background = "#f59e0b";
+                impBtn.style.color = "#fff";
+                impBtn.style.border = "none";
+                impBtn.innerHTML = "⬇️ Import 61 PDF Students";
+                impBtn.onclick = importSpecStudentsOverride;
+                headerBtns.insertBefore(impBtn, headerBtns.firstChild);
+            }
+        });
+
+    </script>
 </body>
+
 </html>
